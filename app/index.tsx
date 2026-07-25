@@ -1,16 +1,57 @@
-import { images } from "@/constants/images";
+// app/index.tsx
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { FormAuth } from "../components/auth/FormAuth";
+import { loginUser, registerUser } from "../services/authApi";
 
 export default function AuthScreen() {
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const router = useRouter();
   const isLogin = authMode === "login";
 
+  const handleFormSubmit = async (values: any, { setSubmitting }: any) => {
+    try {
+      if (isLogin) {
+        await loginUser(values);
+      } else {
+        await registerUser(values);
+      }
+
+      router.replace("/notes");
+    } catch (error: any) {
+      console.error("Помилка запиту:", error);
+      Alert.alert("Помилка", error.message || "Щось пішло не так");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
-    <View className="flex-1 px-8 bg-slate-50 py-12 justify-between relative">
+    <ScrollView
+      contentContainerStyle={{
+        flexGrow: 1,
+        justifyContent: "space-between",
+        paddingHorizontal: 32,
+        paddingTop: 32,
+        paddingBottom: 40,
+      }}
+      className="flex-1 bg-slate-50"
+      keyboardShouldPersistTaps="handled"
+    >
       <View>
         <View className="flex-row items-center mb-6">
-          <Image source={images.icon} className="w-14 h-14" />
+          <Image
+            source={require("@/assets/images/icon.png")}
+            className="w-14 h-14"
+          />
           <Text className="pl-2 font-fraunces text-3xl text-neutral-900">
             Note Hub
           </Text>
@@ -23,9 +64,10 @@ export default function AuthScreen() {
           <Text className="font-fraunces text-lg text-gray-500 mt-1">
             {isLogin
               ? "Авторизуйтесь, щоб бачити нотатки"
-              : "Зареєстрайтеся, щоб почати"}
+              : "Зареєструйтеся, щоб почати"}
           </Text>
         </View>
+
         <View className="flex-row w-full h-14 mt-8 p-1 bg-gray-200 rounded-xl">
           <TouchableOpacity
             onPress={() => setAuthMode("login")}
@@ -33,7 +75,9 @@ export default function AuthScreen() {
             className="flex-1 items-center justify-center rounded-lg"
           >
             <Text
-              className={`font-roboto-bold text-base ${isLogin ? "text-teal-600" : "text-gray-500"}`}
+              className={`font-roboto-bold text-base ${
+                isLogin ? "text-teal-600" : "text-gray-500"
+              }`}
             >
               Вхід
             </Text>
@@ -45,58 +89,21 @@ export default function AuthScreen() {
             className="flex-1 items-center justify-center rounded-lg"
           >
             <Text
-              className={`font-roboto-bold text-base ${!isLogin ? "text-teal-600" : "text-gray-500"}`}
+              className={`font-roboto-bold text-base ${
+                !isLogin ? "text-teal-600" : "text-gray-500"
+              }`}
             >
               Реєстрація
             </Text>
           </TouchableOpacity>
         </View>
-        {!isLogin && (
-          <View className="mt-6">
-            <Text className="text-gray-500 text-sm font-roboto-bold">ІМЯ</Text>
-            <TextInput
-              placeholder="Ім'я"
-              placeholderTextColor="#94a3b8"
-              className="mt-2 h-14 px-4 bg-white rounded-xl border border-gray-200 text-base text-black"
-            />
-          </View>
-        )}
-        <View className="mt-6">
-          <Text className="text-gray-500 text-sm font-roboto-bold">EMAIL</Text>
-          <TextInput
-            placeholder="Email"
-            placeholderTextColor="#94a3b8"
-            className="mt-2 h-14 px-4 bg-white rounded-xl border border-gray-200 text-base text-black"
-            autoCapitalize="none"
-          />
-        </View>
 
-        <View className="mt-4">
-          <Text className="text-gray-500 text-sm font-roboto-bold">
-            PASSWORD
-          </Text>
-          <TextInput
-            placeholder="Password"
-            placeholderTextColor="#94a3b8"
-            secureTextEntry
-            className="mt-2 h-14 px-4 bg-white rounded-xl border border-gray-200 text-base text-black"
-          />
-          {isLogin && (
-            <TouchableOpacity>
-              <Text className="text-teal-600 font-fraunces text-base mt-3 text-right">
-                Забули пароль?
-              </Text>
-            </TouchableOpacity>
-          )}
+        <View className="mt-2">
+          <FormAuth mode={authMode} onSubmit={handleFormSubmit} />
         </View>
-        <TouchableOpacity className="h-16 mt-8 justify-center items-center bg-teal-600 rounded-xl">
-          <Text className="text-white text-xl font-roboto-bold">
-            {isLogin ? "Увійти" : "Зареєструватися"}
-          </Text>
-        </TouchableOpacity>
       </View>
 
-      <View className="absolute bottom-6 left-0 right-0 flex-row justify-center items-center gap-1">
+      <View className="flex-row justify-center items-center gap-1 mt-10">
         <Text className="font-fraunces text-sm text-gray-500">
           {isLogin ? "Немає облікового запису?" : "Вже є обліковий запис?"}
         </Text>
@@ -108,6 +115,6 @@ export default function AuthScreen() {
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 }
