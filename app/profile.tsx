@@ -1,11 +1,11 @@
 import React from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { ProfileHeader } from "../components/profile/ProfileHeader";
 import { ProfileMenu } from "../components/profile/ProfileMenu";
@@ -13,8 +13,17 @@ import { ProfileStats } from "../components/profile/ProfileStats";
 import { useProfile } from "../hooks/useProfile";
 
 export default function ProfileScreen() {
-  const { user, isLoading, isUploading, stats, handlePickImage, handleLogout } =
-    useProfile();
+  const {
+    user,
+    isLoading,
+    isUploading,
+    stats,
+    isBiometricEnabled,
+    isBiometricSupported,
+    toggleBiometric,
+    handlePickImage,
+    handleLogout,
+  } = useProfile();
 
   if (isLoading) {
     return (
@@ -45,7 +54,11 @@ export default function ProfileScreen() {
         uniqueTagsCount={stats.uniqueTagsCount}
       />
 
-      <ProfileMenu />
+      <ProfileMenu
+        isBiometricEnabled={isBiometricEnabled}
+        isBiometricSupported={isBiometricSupported}
+        onToggleBiometric={toggleBiometric}
+      />
 
       <View
         className="mx-4 mt-4 rounded-2xl p-5 flex-row items-center justify-between"

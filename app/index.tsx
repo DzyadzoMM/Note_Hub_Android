@@ -1,6 +1,6 @@
 // app/index.tsx
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Image,
@@ -11,16 +11,41 @@ import {
 } from "react-native";
 import { FormAuth } from "../components/auth/FormAuth";
 import { loginUser, registerUser } from "../services/authApi";
+import { biometricService } from "../services/biometricService";
 
 export default function AuthScreen() {
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const [isBiometricSupported, setIsBiometricSupported] = useState(false);
   const router = useRouter();
   const isLogin = authMode === "login";
+
+  useEffect(() => {
+    biometricService.checkSupport().then((res) => {
+      if (res.isAvailable) {
+        setIsBiometricSupported(true);
+      }
+    });
+  }, []);
 
   const handleFormSubmit = async (values: any, { setSubmitting }: any) => {
     try {
       if (isLogin) {
         await loginUser(values);
+
+        if (isBiometricSupported) {
+          Alert.alert(
+            "Біометрія",
+            "Бажаєте увімкнути вхід за відбитком пальця для наступних разів?",
+            [
+              { text: "Ні", style: "cancel" },
+              {
+                text: "Так",
+                onPress: () =>
+                  biometricService.enable(values.email, values.password),
+              },
+            ],
+          );
+        }
       } else {
         await registerUser(values);
       }
@@ -31,6 +56,20 @@ export default function AuthScreen() {
       Alert.alert("Помилка", error.message || "Щось пішло не так");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleBiometricLogin = async () => {
+    try {
+      await biometricService.login(async (email: string, password: string) => {
+        await loginUser({ email, password });
+        router.replace("/notes");
+      });
+    } catch (error: any) {
+      Alert.alert(
+        "Помилка біометрії",
+        error.message || "Не вдалося увійти за відбитком",
+      );
     }
   };
 
@@ -101,6 +140,17 @@ export default function AuthScreen() {
         <View className="mt-2">
           <FormAuth mode={authMode} onSubmit={handleFormSubmit} />
         </View>
+
+        {isLogin && isBiometricSupported && (
+          <TouchableOpacity
+            onPress={handleBiometricLogin}
+            className="w-full h-14 mt-4 bg-teal-50 border border-teal-600 items-center justify-center rounded-xl flex-row gap-2"
+          >
+            <Text className="font-roboto-bold text-teal-600 text-base">
+              Увійти за відбитком пальця
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <View className="flex-row justify-center items-center gap-1 mt-10">

@@ -3,20 +3,38 @@ import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
 import { Alert } from "react-native";
+import ReactNativeBiometrics from "react-native-biometrics";
 import { API_URL } from "../services/apiClient";
 import { getMy, updateUserAvatar } from "../services/userApi";
+
+const rnBiometrics = new ReactNativeBiometrics();
 
 export function useProfile() {
   const [user, setUser] = useState<any>(null);
   const [notes, setNotes] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+
+  // Додаємо стани для біометрії
+  const [isBiometricEnabled, setIsBiometricEnabled] = useState(false);
+  const [isBiometricSupported, setIsBiometricSupported] = useState(false);
+
   const router = useRouter();
 
   useEffect(() => {
     const loadProfileData = async () => {
       try {
         setIsLoading(true);
+
+        // Перевірка підтримки біометрії та завантаження налаштування
+        const { available } = await rnBiometrics.isSensorAvailable();
+        setIsBiometricSupported(available);
+
+        const savedBiometricPref =
+          await SecureStore.getItemAsync("biometric_enabled");
+        if (savedBiometricPref === "true") {
+          setIsBiometricEnabled(true);
+        }
 
         const userData = await getMy();
         setUser(userData);
@@ -45,6 +63,33 @@ export function useProfile() {
 
     loadProfileData();
   }, []);
+
+  // Функція перемикання біометрії
+  const toggleBiometric = async (value: boolean) => {
+    if (value) {
+      const { available } = await rnBiometrics.isSensorAvailable();
+      if (!available) {
+        Alert.alert(
+          "Помилка",
+          "Біометричний сенсор недоступний на цьому пристрої",
+        );
+        return;
+      }
+
+      const { success } = await rnBiometrics.simplePrompt({
+        promptMessage: "Підтвердіть особу для увімкнення біометрії",
+      });
+
+      if (success) {
+        setIsBiometricEnabled(true);
+        await SecureStore.setItemAsync("biometric_enabled", "true");
+        Alert.alert("Успіх", "Вхід за біометрією увімкнено");
+      }
+    } else {
+      setIsBiometricEnabled(false);
+      await SecureStore.setItemAsync("biometric_enabled", "false");
+    }
+  };
 
   const handlePickImage = async () => {
     const permissionResult =
@@ -83,6 +128,7 @@ export function useProfile() {
   const handleLogout = async () => {
     try {
       await SecureStore.deleteItemAsync("userCookies");
+      await SecureStore.deleteItemAsync("biometric_enabled");
       router.replace("/");
     } catch (error) {
       console.error("Помилка при логауті:", error);
@@ -100,6 +146,9 @@ export function useProfile() {
     user,
     isLoading,
     isUploading,
+    isBiometricEnabled,
+    isBiometricSupported,
+    toggleBiometric,
     stats: {
       notesCount: notes.length,
       totalWords,
