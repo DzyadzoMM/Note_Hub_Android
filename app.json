@@ -8,12 +8,6 @@
     "scheme": "movies",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "owner": "dzyadzomm",
-    "extra": {
-      "eas": {
-        "projectId": "01c686ff-5f94-4da4-8775-2529fefef182"
-      }
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.dzyadzomm.Note-Hub"
@@ -37,7 +31,7 @@
       [
         "expo-splash-screen",
         {
-         "image": "./assets/images/icon.png",
+          "image": "./assets/images/icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -53,6 +47,12 @@
       "reactCompiler": true,
       "tsconfigPaths": true
     },
-    
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3a487701-aea5-4d42-b797-1b87f5558efa"
+      }
+    },
+    "owner": "dzyadzomm"
   }
 }
