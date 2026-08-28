@@ -8,6 +8,12 @@
     "scheme": "movies",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "owner": "dzyadzomm",
+    "extra": {
+      "eas": {
+        "projectId": "01c686ff-5f94-4da4-8775-2529fefef182"
+      }
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.dzyadzomm.Note-Hub"
@@ -47,10 +53,6 @@
       "reactCompiler": true,
       "tsconfigPaths": true
     },
-    "extra": {
-      "eas": {
-        "projectId": "01c686ff-5f94-4da4-8775-2529fefef182"
-      }
-    },
+    
   }
 }
