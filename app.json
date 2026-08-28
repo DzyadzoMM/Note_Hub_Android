@@ -48,11 +48,9 @@
       "tsconfigPaths": true
     },
     "extra": {
-      "router": {},
       "eas": {
         "projectId": "01c686ff-5f94-4da4-8775-2529fefef182"
       }
     },
-    "owner": "dzyadzomms-organization"
   }
 }
