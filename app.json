@@ -13,7 +13,6 @@
       "bundleIdentifier": "com.dzyadzomm.Note-Hub"
     },
     "android": {
-      "versionCode": 2,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/icon.png"
